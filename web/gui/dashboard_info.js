@@ -481,6 +481,12 @@ netdataDashboard.menu = {
         info: undefined
     },
 
+    'nvidia_smi': {
+        title: 'NVIDIA GPU',
+        icon: '<i class="fas fa-atom"></i>',
+        info: 'Statistics for NVIDIA Graphics Processing Units (GPUs).'
+    },
+
     'powersupply': {
         title: 'Power Supply',
         icon: '<i class="fas fa-battery-half"></i>',
