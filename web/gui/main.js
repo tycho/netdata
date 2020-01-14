@@ -1438,6 +1438,10 @@ function enrichChartData(chart) {
             }
             break;
 
+        case 'nvidia':
+            chart.menu = chart.type;
+            break;
+
         case 'tc':
             chart.menu = tmp;
 
