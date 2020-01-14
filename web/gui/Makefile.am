@@ -93,7 +93,7 @@ dist_weblib_DATA = \
     lib/d3pie-0.2.1-netdata-3.js \
     lib/dygraph-c91c859.min.js \
     lib/dygraph-smooth-plotter-c91c859.js \
-    lib/fontawesome-all-5.0.1.min.js \
+    lib/fontawesome-all-5.12.0.min.js \
     lib/gauge-1.3.2.min.js \
     lib/jquery-2.2.4.min.js \
     lib/jquery.easypiechart-97b5824.min.js \

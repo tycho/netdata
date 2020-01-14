@@ -15,7 +15,7 @@ NETDATA.requiredJs = [
         }
     },
     {
-        url: NETDATA.serverStatic + 'lib/fontawesome-all-5.0.1.min.js',
+        url: NETDATA.serverStatic + 'lib/fontawesome-all-5.12.0.min.js',
         async: true,
         isAlreadyLoaded: function () {
             return typeof netdataNoFontAwesome !== 'undefined' && netdataNoFontAwesome;
