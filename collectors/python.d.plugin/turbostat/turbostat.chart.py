@@ -36,21 +36,22 @@ CHART_TEMPLATES = {
         ]},
 }
 
-MSR_RAPL_POWER_UNIT = 0x606
 DEVNULL = open(os.devnull, 'wb')
 
-def rdmsr(cpu, address):
-    # HACK: Doing this for debugging. Very likely wrong for anything but my system.
-    if address == MSR_RAPL_POWER_UNIT:
-        return 0x00000000000a0e03
+def get_rapl_power_unit(cpu):
+    proc = subprocess.Popen(['turbostat', '-c', str(cpu), '-d', '0'], stdout=DEVNULL, stderr=subprocess.PIPE)
+    for line in proc.stderr:
+        line = line.decode('utf-8').rstrip()
 
-    # NOTE: Requires CAP_SYS_RAWIO since Linux 3.7-ish
-    with open('/dev/cpu/' + str(cpu) + '/msr', 'rb', buffering=0) as msr:
-        msr.seek(address)
-        data = msr.read(8)
-        v, = struct.unpack('<Q', data)
-        return v
+        if not line:
+            continue
 
+        line = line.split()
+
+        if line[1] == 'MSR_RAPL_POWER_UNIT:' or line[1] == 'MSR_RAPL_PWR_UNIT:':
+            return int(line[2], 16)
+
+    raise IOError("Couldn't find RAPL power unit")
 
 class Service(SimpleService):
     def __init__(self, configuration=None, name=None):
@@ -193,7 +194,7 @@ class Service(SimpleService):
 
             if pkgidx not in self.rapl:
                 try:
-                    msr = rdmsr(cpuidx, MSR_RAPL_POWER_UNIT)
+                    msr = get_rapl_power_unit(cpuidx)
                 except IOError:
                     # We don't have CAP_SYS_RAWIO and can't rdmsr :(
                     continue
