@@ -8,8 +8,6 @@ import struct
 import subprocess
 import time
 
-disabled_by_default = True
-
 from bases.FrameworkServices.SimpleService import SimpleService
 
 _BASE10_LINES = set(['CPU', 'core', 'IRQ', 'SMI', 'package'])
