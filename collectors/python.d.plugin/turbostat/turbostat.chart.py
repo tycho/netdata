@@ -13,6 +13,15 @@ from bases.FrameworkServices.SimpleService import SimpleService
 _BASE10_LINES = set(['CPU', 'core', 'IRQ', 'SMI', 'package'])
 
 CHART_TEMPLATES = {
+    'power': {
+        'options': [None, 'Power utilization', 'Watts', 'turbostat', 'turbostat', 'line'],
+        '_divisor': 100,
+        '_per': 'package',
+        '_replace': [ ('_watts', '') ],
+        '_metrics': ['pkg_watts', 'ram_watts', 'gfx_watts'],
+        'lines': [
+            # lines are created dynamically in `check()` method
+        ]},
     'avg_mhz': {
         'options': [None, 'Average CPU clock frequency, including idle time', 'MHz', 'turbostat', 'turbostat', 'line'],
         'lines': [
@@ -20,15 +29,6 @@ CHART_TEMPLATES = {
         ]},
     'busy_mhz': {
         'options': [None, 'Average CPU clock frequency, when busy', 'MHz', 'turbostat', 'turbostat', 'line'],
-        'lines': [
-            # lines are created dynamically in `check()` method
-        ]},
-    'power': {
-        'options': [None, 'Power utilization', 'Watts', 'turbostat', 'turbostat', 'line'],
-        '_divisor': 100,
-        '_per': 'package',
-        '_replace': [ ('_watts', '') ],
-        '_metrics': ['pkg_watts', 'ram_watts', 'gfx_watts'],
         'lines': [
             # lines are created dynamically in `check()` method
         ]},
@@ -243,6 +243,14 @@ class Service(SimpleService):
                 else:
                     suffix = None
 
+                metrics = template.get('_metrics', [chart])
+                per = template.get('_per', 'logical')
+                divisor = template.get('_divisor', 1000)
+                substitutions = template.get('_replace', [])
+
+                if per == 'package':
+                    suffix = pkgname
+
                 chartname = chart
                 if suffix is not None:
                     chartname += '_' + suffix
@@ -250,11 +258,6 @@ class Service(SimpleService):
                 if chartname not in self.definitions:
                     self.definitions[chartname] = copy.deepcopy(template)
                     order.append((chartname, (pkgidx, coreidx, cpuidx)))
-
-                metrics = template.get('_metrics', [chart])
-                per = template.get('_per', 'logical')
-                divisor = template.get('_divisor', 1000)
-                substitutions = template.get('_replace', [])
 
                 prefix = cpuname
                 nickname_prefix = ''
