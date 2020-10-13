@@ -36,6 +36,15 @@ CHART_TEMPLATES = {
 
 DEVNULL = open(os.devnull, 'wb')
 
+def read_file_line(path):
+    return open(path, 'rt').read().strip()
+
+def get_llc_dirname():
+    for dirpath, dirnames, filenames in os.walk('/sys/devices/system/cpu/cpu0/cache'):
+        dirnames = list(filter(lambda x: x.startswith('index'), dirnames))
+        dirnames.sort()
+        return dirnames[-1]
+
 def get_rapl_power_unit(cpu):
     proc = subprocess.Popen(['turbostat', '-c', str(cpu), '-d', '0'], stdout=DEVNULL, stderr=subprocess.PIPE)
     for line in proc.stderr:
@@ -170,7 +179,7 @@ class Service(SimpleService):
         split_by = None
         try:
             split_by = str(self.configuration['split_by'])
-            if split_by not in ['logical', 'core', 'package']:
+            if split_by not in ['logical', 'llc', 'core', 'package']:
                 self.error("Value '%s' for 'split_by' configuration option isn't a valid choice, ignoring" % (split_by,))
                 split_by = None
         except (KeyError, TypeError):
@@ -182,12 +191,16 @@ class Service(SimpleService):
             self.error("Could not invoke turbostat, disabling.")
             return False
 
+        llc_dirname = get_llc_dirname()
+
         for cpuidx, stats in self.last_turbostat.items():
             cpuname = 'cpu%d' % (cpuidx,)
             pkgidx = stats['package']
             self.assignment[cpuname] = {
+                'cpuidx': cpuidx,
                 'package': pkgidx,
                 'core': stats['core'],
+                'llc_id': int(read_file_line('/sys/devices/system/cpu/cpu%d/cache/%s/id' % (cpuidx, llc_dirname)))
             }
 
             if pkgidx not in self.rapl:
@@ -212,14 +225,17 @@ class Service(SimpleService):
             for cpuname in sorted(self.assignment, key=lambda v: int(v[3:].split('_')[0])):
                 assignment = self.assignment[cpuname]
 
-                cpuidx = int(cpuname[3:])
+                cpuidx = assignment['cpuidx']
                 pkgidx = assignment['package']
                 pkgname = 'pkg%d' % (pkgidx,)
                 coreidx = assignment['core']
                 corename = 'core%d' % (coreidx,)
+                llcname = 'llc%d' % (assignment['llc_id'])
 
                 if split_by == 'package':
                     suffix = pkgname
+                elif split_by == 'llc':
+                    suffix = pkgname + '_' + llcname
                 elif split_by == 'core':
                     suffix = pkgname + '_' + corename
                 elif split_by == 'logical':
