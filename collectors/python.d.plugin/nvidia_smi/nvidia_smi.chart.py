@@ -14,8 +14,6 @@ import xml.etree.ElementTree as et
 from bases.FrameworkServices.SimpleService import SimpleService
 from bases.collection import find_binary
 
-disabled_by_default = True
-
 NVIDIA_SMI = 'nvidia-smi'
 
 EMPTY_ROW = ''
