@@ -59,6 +59,8 @@ CapabilityBoundingSet=CAP_SYS_ADMIN
 CapabilityBoundingSet=CAP_SYS_PTRACE
 # is required for ebpf plugin
 CapabilityBoundingSet=CAP_SYS_RESOURCE
+# is required for turbostat plugin
+CapabilityBoundingSet=CAP_SYS_RAWIO
 # is required for fping app
 CapabilityBoundingSet=CAP_NET_RAW
 # is required for cgroups plugin
